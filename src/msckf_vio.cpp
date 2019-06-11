@@ -178,6 +178,7 @@ bool MsckfVio::loadParameters() {
 
 bool MsckfVio::createRosIO() {
   odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 10);
+  proc_times_pub = nh.advertise<std_msgs::Float64>("proc_times", 10);
   feature_pub = nh.advertise<sensor_msgs::PointCloud2>(
       "feature_point_cloud", 10);
 
@@ -406,6 +407,16 @@ void MsckfVio::featureCallback(
   double prune_cam_states_time = (
       ros::Time::now()-start_time).toSec();
 
+  double processing_end_time = ros::Time::now().toSec();
+  double processing_time =
+    processing_end_time - processing_start_time;
+
+  // Publish processing time
+  double processing_time_ms = processing_time * 1000;
+  std_msgs::Float64 proc_times_msg;
+  proc_times_msg.data = processing_time_ms;
+  proc_times_pub.publish(proc_times_msg);
+
   // Publish the odometry.
   start_time = ros::Time::now();
   publish(msg->header.stamp);
@@ -415,9 +426,6 @@ void MsckfVio::featureCallback(
   // Reset the system if necessary.
   onlineReset();
 
-  double processing_end_time = ros::Time::now().toSec();
-  double processing_time =
-    processing_end_time - processing_start_time;
   if (processing_time > 1.0/frame_rate) {
     ++critical_time_cntr;
     ROS_INFO("\033[1;31mTotal processing time %f/%d...\033[0m",
@@ -1445,4 +1453,3 @@ void MsckfVio::publish(const ros::Time& time) {
 }
 
 } // namespace msckf_vio
-

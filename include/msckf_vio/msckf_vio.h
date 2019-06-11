@@ -19,6 +19,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <nav_msgs/Odometry.h>
+#include <std_msgs/Float64.h>
 #include <tf/transform_broadcaster.h>
 #include <std_srvs/Trigger.h>
 
@@ -210,6 +211,7 @@ class MsckfVio {
     ros::Publisher odom_pub;
     ros::Publisher feature_pub;
     tf::TransformBroadcaster tf_pub;
+    ros::Publisher proc_times_pub;
     ros::ServiceServer reset_srv;
 
     // Frame id
